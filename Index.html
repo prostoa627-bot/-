@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Случайный текст</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --primary: #3f51b5;
+        --primary-hover: #33429a;
+        --text: #1f2937;
+        --muted: #6b7280;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: Inter, Arial, sans-serif;
+        background: linear-gradient(145deg, #eef2ff, var(--bg));
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        color: var(--text);
+      }
+
+      .card {
+        width: 100%;
+        max-width: 700px;
+        background: var(--card);
+        border-radius: 16px;
+        box-shadow: 0 14px 40px rgba(20, 34, 90, 0.15);
+        padding: 28px;
+      }
+
+      h1 {
+        margin: 0 0 18px;
+        font-size: 28px;
+      }
+
+      .output {
+        min-height: 130px;
+        padding: 16px;
+        border: 1px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 18px;
+        line-height: 1.5;
+        background: #fafbff;
+        white-space: pre-wrap;
+      }
+
+      .hint {
+        color: var(--muted);
+      }
+
+      .actions {
+        margin-top: 18px;
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      button {
+        border: 0;
+        border-radius: 10px;
+        padding: 12px 18px;
+        font-size: 15px;
+        cursor: pointer;
+        transition: transform 0.06s ease, background-color 0.2s ease;
+      }
+
+      button:active {
+        transform: translateY(1px);
+      }
+
+      .primary {
+        color: #fff;
+        background: var(--primary);
+      }
+
+      .primary:hover {
+        background: var(--primary-hover);
+      }
+
+      .secondary {
+        background: #e5e7eb;
+        color: #111827;
+      }
+
+      .secondary:hover {
+        background: #d1d5db;
+      }
+
+      .status {
+        margin-top: 10px;
+        min-height: 20px;
+        font-size: 14px;
+        color: var(--muted);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="card">
+      <h1>Случайный текст</h1>
+
+      <div id="output" class="output">
+        <span class="hint">Нажмите кнопку, чтобы получить случайный текст.</span>
+      </div>
+
+      <div class="actions">
+        <button class="primary" type="button" onclick="showRandomText()">
+          Показать случайный текст
+        </button>
+        <button class="secondary" type="button" onclick="copyText()">Копировать</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </main>
+
+    <script>
+      function setStatus(message) {
+        document.getElementById('status').textContent = message || '';
+      }
+
+      function showRandomText() {
+        setStatus('Загрузка...');
+
+        google.script.run
+          .withSuccessHandler(function (text) {
+            document.getElementById('output').textContent = text;
+            setStatus('Готово');
+          })
+          .withFailureHandler(function (error) {
+            setStatus('Ошибка: ' + (error && error.message ? error.message : error));
+          })
+          .getRandomText();
+      }
+
+      async function copyText() {
+        const text = document.getElementById('output').textContent.trim();
+
+        if (!text || text === 'Нажмите кнопку, чтобы получить случайный текст.') {
+          setStatus('Сначала получите текст по кнопке выше.');
+          return;
+        }
+
+        try {
+          await navigator.clipboard.writeText(text);
+          setStatus('Текст скопирован в буфер обмена.');
+        } catch (e) {
+          setStatus('Не удалось скопировать автоматически. Скопируйте текст вручную.');
+        }
+      }
+    </script>
+  </body>
+</html>
